@@ -72,11 +72,14 @@ ao_fec_encode(const uint8_t *in, size_t len, uint8_t *out);
  * Decode data. 'in' is one byte per bit soft decision.
  * Bits are MSB..LSB. For soft decision 0xff..0x00 is 0..1
  * (inverted). 'out_len` is length of expected decode
- * including 2 bytes used for CRC-16 checksum. On return,
+ * including 2 bytes used for CRC-16 checksum. On successful return,
  * the last two bytes will be 0x00,0x00 if checksum failed,
  * or 0x00,0x80 if checksum passed.
+ *
+ * Returns 0 on success, -1 when 'out_len' is incorrect or
+ * checksum fails.
  */
-extern void
+extern int
 ao_fec_decode(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
 
 #endif /* _AO_FEC_H_ */

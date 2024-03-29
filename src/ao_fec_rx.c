@@ -16,8 +16,8 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
+#include <stdlib.h>
 #include "ao_fec.h"
-#include <stdio.h>
 
 /* 
  * byte order repeats through 3 2 1 0
@@ -80,9 +80,13 @@ ao_next_state(uint8_t state, uint8_t bit)
 	return ((state << 1) | bit) & 0x7;
 }
 
-void
+int
 ao_fec_decode(const uint8_t *in, size_t len, uint8_t *out, size_t out_len)
 {
+	if (out_len < 2 || len != 8 * AOC_FEC_ENCODE_LEN(out_len - 2)) {
+		return -1;
+	}
+
 	static uint32_t	cost[2][NUM_STATE];		/* path cost */
 	static bits_t	bits[2][NUM_STATE];		/* save bits to quickly output them */
 
@@ -252,14 +256,18 @@ ao_fec_decode(const uint8_t *in, size_t len, uint8_t *out, size_t out_len)
 
 			if (!--out_len) {
 				if ((out[-2] == (uint8_t) (crc >> 8)) &&
-				    out[-1] == (uint8_t) crc)
+				    out[-1] == (uint8_t) crc) {
+					out[-2] = 0;
 					out[-1] = AO_FEC_DECODE_CRC_OK;
-				else
+					return 0;
+				} else {
+					out[-2] = 0;
 					out[-1] = 0;
-				out[-2] = 0;
-				return;
+					return -1;
+				}
 			}
 			o += 8;
 		}
 	}
+	abort();
 }

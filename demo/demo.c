@@ -3,6 +3,7 @@
 #include <inttypes.h>
 #include <ao_fec.h>
 #include <string.h>
+#include <stdlib.h>
 
 static uint8_t real_packet[] = {
  0x40, 0x38, 0xcd, 0x38, 0x3d, 0x34, 0xca, 0x31, 0xc3, 0xc1, 0xc6, 0x35, 0xcc, 0x3a, 0x3c,
@@ -156,19 +157,19 @@ ao_real_packet(void)
 	uint8_t	decode[64];
 	int ok;
 
-	ao_fec_decode(real_packet, 576, decode, 34);
-
+	ok = ao_fec_decode(real_packet, 576, decode, 34);
 	ao_fec_dump_bytes(decode, 34, "Decode");
 
-	if (decode[33] == AO_FEC_DECODE_CRC_OK) {
+	if (ok == 0) {
 		printf ("match\n");
-
-		ok = 1;
+		return 1;
+        } else if (decode[33] != AO_FEC_DECODE_CRC_OK) {
+		printf ("crc error\n");
+		return 0;
 	} else {
-		printf ("actual packet crc error\n");
-		ok = 0;
+		printf ("length error\n");
+		abort();
 	}
-	return ok;
 }
 
 size_t encode(uint8_t *input, size_t len, uint8_t *output) {
@@ -199,13 +200,17 @@ ssize_t decode(uint8_t *input, size_t input_len, uint8_t **output, size_t output
     printf("output_len = %ld\n", output_len);
     static uint8_t decoded[256];
     assert(output_len <= 252);
-    ao_fec_decode(soft, soft_len, decoded, output_len);
-    if (decoded[output_len-1] != AO_FEC_DECODE_CRC_OK) {
-	printf("CRC check failed\n");
-        for (size_t i = output_len - 2; i < output_len; i++) {
-            printf("d[%ld] = %02x\n", i, decoded[i]);
-        }
-        return -1;
+    int ok = ao_fec_decode(soft, soft_len, decoded, output_len);
+    if (ok == -1 ) {
+	if (decoded[output_len-1] != AO_FEC_DECODE_CRC_OK) {
+	    printf("CRC check failed\n");
+	    for (size_t i = output_len - 2; i < output_len; i++) {
+		printf("d[%ld] = %02x\n", i, decoded[i]);
+	    }
+	    return -1;
+	}
+	printf("length error\n");
+	abort();
     }
     *output = decoded;
     return output_len;

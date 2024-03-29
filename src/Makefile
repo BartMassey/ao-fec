@@ -3,6 +3,8 @@ CFLAGS = -Wall -Wextra -Werror -g -O3
 
 OBJS = ao_fec_tx.o ao_fec_rx.o
 
+all: ao_whiten.h libao_fec.a
+
 libao_fec.a: $(OBJS)
 	$(AR) crs libao_fec.a $(OBJS)
 
@@ -17,4 +19,4 @@ ao_whiten.h: make_whiten
 	./make_whiten >ao_whiten.h
 
 clean:
-	-rm -f *.o make_whiten ao_whiten.h libao_fec.a
+	-rm -f *.o make_whiten libao_fec.a
