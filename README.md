@@ -1,19 +1,23 @@
-# ao-fec: AltOS FEC using convolutional codes
-Bart Massey 2024
+# ao-fec: convolutional FEC code
+Copyright (c) 2012 Keith Packard <keithp@keithp.com>
 
-This Rust library crate wraps Keith Packard's Forward Error
-Correction C code from AltOS <git:git.gag.com/fw/altos>.
-See the `csrc/` directory for the underlying code and
-details.
+This code is extracted from the AltOS repository
+<git://git.gag.com/altos>. It performs Forward Error
+Correction encoding and decoding, using a rate 1/2 limit 4
+convolutional code with a Viterbi-style decoder.
+
+This code is compatible (tested) with the hardware FEC in
+the TI CC1111 radio chip. Because of this, the interface is
+a bit awkard. Please see the comments in the source files
+for the API details.
 
 # Acknowledgments
 
-The hard part of this is obviously Keith Packard's
-work. Thanks much! Thanks also to Keith for helping me debug
-and test this.
+Thanks to Keith Packard for writing this, and for helping me
+debug and test it.
 
 # License
 
 This code is licensed under the "GNU General Public License
-version 2". See the file `csrc/LICENSE.txt` in this codebase for
+version 2". See the file `LICENSE.txt` in this codebase for
 licensing terms.
